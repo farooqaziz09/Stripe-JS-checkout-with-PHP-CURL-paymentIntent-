@@ -1,0 +1,62 @@
+<html>
+<head>
+  <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDHjnW7QW_0XfFiD9f3cxYA9wzilil_HKo&libraries=places"></script>
+  <script>
+    function initialize() {
+      var input = document.getElementById('searchTextField');
+      var autocomplete = new google.maps.places.Autocomplete(input);
+
+      google.maps.event.addListener(autocomplete, 'place_changed', function () {
+        var place = autocomplete.getPlace();
+        
+        console.log(place);
+        if (!place.geometry || !place.geometry.location) {
+          // User entered the name of a Place that was not suggested and
+          // pressed the Enter key, or the Place Details request failed.
+          window.alert("No details available for input: '" + place.name + "'");
+          return;
+        }
+        document.getElementById('city2').value = place.name;
+        document.getElementById('cityLat').value = place.geometry.location.lat();
+        document.getElementById('cityLng').value = place.geometry.location.lng();
+        var latlng = new google.maps.LatLng(place.geometry.location.lat(), place.geometry.location.lng());
+        geocoder = new google.maps.Geocoder();
+        console.log(geocoder);
+        const infowindow = new google.maps.InfoWindow();
+        console.log(infowindow);
+
+        geocoder.geocode({'latLng': latlng}, function(results, status) {
+          if (status == google.maps.GeocoderStatus.OK) {
+            if (results[0]) {
+              for (j = 0; j < results[0].address_components.length; j++) {
+                if (results[0].address_components[j].types[0] == 'postal_code'){
+                  console.log("Zip Code: " + results[0].address_components[j].short_name);
+                }
+              }
+            }
+          } else {
+            console.log("Geocoder failed due to: " + status);
+          }
+        });
+        for (var i = 0; i < place.address_components.length; i++) {
+          for (var j = 0; j < place.address_components[i].types.length; j++) {
+            if (place.address_components[i].types[j] == "postal_code") {
+              document.getElementById('postal_code').innerHTML = place.address_components[i].long_name;
+
+            }
+          }
+        }
+      });
+    }
+    google.maps.event.addDomListener(window, 'load', initialize);
+
+  </script>
+</head>
+<body>
+  <input type="text" id="searchTextField"  size="50" placeholder="Enter a location" autocomplete="on" runat="server" />  
+  <div id="postal_code" ></div>
+  <input type="hidden" id="city2" name="city2" />
+  <input type="hidden" id="cityLat" name="cityLat" />
+  <input type="hidden" id="cityLng" name="cityLng" />
+</body>
+</html>
